@@ -27,11 +27,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         movieAdapter = MovieAdapter {
-            val intent = Intent(this, MovieDetailActivity::class.java)
-            intent.putExtra("movieId", it.id)
-            intent.putExtra("movieOverview", it.overview)
-            intent.putExtra("movieTitle", it.title)
-            intent.putExtra("moviePoster", it.poster_path)
+            val intent = Intent(this, MovieDetailActivity::class.java).apply {
+                putExtra("movieId", it.id)
+                putExtra("movieOverview", it.overview)
+                putExtra("movieTitle", it.title)
+                putExtra("moviePoster", it.poster_path)
+                putExtra("movieReleaseDate", it.release_date)
+                putExtra("movieBudget", it.budget)
+                putExtra("movieGenres", it.genres?.joinToString(", ") ?: "Sem Gênero") // Passando os gêneros como string
+            }
             startActivity(intent)
         }
 

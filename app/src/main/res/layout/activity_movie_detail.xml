@@ -120,6 +120,25 @@
                 android:textColor="@color/white"
                 android:textSize="16sp" />
 
+            <TextView
+                android:id="@+id/txtData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Data do Lançamento"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="11/08/2022"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
             <!-- Texto Descrição -->
             <TextView
                 android:id="@+id/overviewTextView"

@@ -27,23 +27,20 @@ class MovieDetailViewModel : ViewModel() {
 
                     // Atualize o LiveData com os detalhes do filme
                     movie?.let {
-                        _movieDetails.value = it
-
-                        // Processar o campo de orçamento (budget)
-                        val budget = it.budget?.let { budgetValue ->
+                        // Formatar o orçamento
+                        val formattedBudget = it.budget?.let { budgetValue ->
                             "R$ ${budgetValue.formatCurrency()}"
                         } ?: "Não disponível"
 
                         // Processar os gêneros (genres)
                         val genres = it.genres?.joinToString { genre -> genre.name } ?: "Sem gênero"
 
-                        // Atualizar os detalhes
-                        _movieDetails.value = _movieDetails.value?.copy(
-                            budget = it.budget,
-                            genres = it.genres
+                        // Atualizar os detalhes com o orçamento formatado e os gêneros
+                        _movieDetails.value = it.copy(
+                            budget = it.budget, // Orçamento original
+                            genres = it.genres, // Gêneros
+                            formattedBudget = formattedBudget // Orçamento formatado
                         )
-
-
                     }
                 } else {
                     Log.e("MovieDetailViewModel", "Erro na resposta da API: ${response.message()}")
