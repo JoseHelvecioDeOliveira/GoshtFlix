@@ -3,6 +3,7 @@ package com.example.goshtflix.activity
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toolbar
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -11,6 +12,8 @@ import coil.load
 import com.example.goshtflix.R
 import com.example.goshtflix.databinding.ActivityMovieDetailBinding
 import com.example.goshtflix.viewModel.MovieDetailViewModel
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.button.MaterialButton
 
 class MovieDetailActivity : AppCompatActivity() {
 
@@ -19,6 +22,19 @@ class MovieDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_movie_detail)
+
+
+        val toolbar: MaterialToolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
+        toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
+
+        val backButton: MaterialButton = findViewById(R.id.backButton)
+        backButton.setOnClickListener {
+            onBackPressed()
+        }
 
         // Recuperando os dados passados pelo Intent
         val movieId = intent.getIntExtra("movieId", -1)
@@ -32,11 +48,16 @@ class MovieDetailActivity : AppCompatActivity() {
         movieDetailViewModel.fetchMovieDetails(movieId)
 
         val titleTextView: TextView = findViewById(R.id.titleTextView)
-        val overviewTextView: TextView = findViewById(R.id.overviewTextView)
+        val titleToolbar: MaterialToolbar = findViewById(R.id.toolbar)
+        val overviewTextView: TextView = findViewById(R.id.tvOverview)
         val posterImageView: ImageView = findViewById(R.id.posterImageView)
 
         titleTextView.text = movieTitle
+
+        titleToolbar.setTitle(movieTitle)
+
         overviewTextView.text = movieOverview
+
 
         if (moviePoster.isNotEmpty()) {
             val posterUrl = "https://image.tmdb.org/t/p/w500$moviePoster"

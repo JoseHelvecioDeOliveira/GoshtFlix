@@ -1,46 +1,160 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    android:scrollbars="vertical">
+    android:background="@color/primaria"
+    android:padding="6dp"
+    tools:context=".activity.MovieDetailActivity">
 
-    <!-- Título do Filme -->
-    <TextView
-        android:id="@+id/titleTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Movie Title"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp"/>
-
-    <!-- Descrição (Overview) do Filme -->
-    <TextView
-        android:id="@+id/overviewTextView"
+    <!-- Toolbar com botão de voltar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Overview of the movie"
-        android:textSize="16sp"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginTop="15dp"
+        android:background="@color/primaria"
+        android:title="GoshtFlix"
+        app:titleTextColor="@color/white"
+        android:titleTextColor="@color/white"
+        app:contentInsetStart="32dp"
+        app:layout_constraintBottom_toTopOf="@id/posterImageView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/ic_voltar" />
 
     <!-- Imagem do Poster -->
     <ImageView
         android:id="@+id/posterImageView"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginBottom="16dp"
+        android:layout_height="500dp"
+        android:padding="6dp"
         android:scaleType="centerCrop"
-        android:layout_gravity="center"/>
+        app:layout_constraintBottom_toTopOf="@id/titleContainer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+
+    <!-- Contêiner do título -->
+    <LinearLayout
+        android:id="@+id/titleContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/black_transparent"
+        android:elevation="4dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
+        android:orientation="vertical"
+        android:padding="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/posterImageView">
+
+        <TextView
+            android:id="@+id/titleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Movie Title"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- NestedScrollView para rolagem -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintBottom_toTopOf="@id/backButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/titleContainer">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="15dp">
+
+            <!-- Texto Valor Arrecadado -->
+            <TextView
+                android:id="@+id/txtValorArrcadado"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Valor Arrecadado: "
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvValor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="$1.000.000"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <!-- Texto Gênero -->
+            <TextView
+                android:id="@+id/txtGenero"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Gênero"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvGenero"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Romance, ação e aventura"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <!-- Texto Descrição -->
+            <TextView
+                android:id="@+id/overviewTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Descrição :"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvOverview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="@tools:sample/lorem"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <!-- Botão para Voltar -->
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/backButton"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Back"
-        android:layout_gravity="center" />
-
-</LinearLayout>
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="8dp"
+        android:text="Voltar"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/nestedScrollView" />
+</androidx.constraintlayout.widget.ConstraintLayout>

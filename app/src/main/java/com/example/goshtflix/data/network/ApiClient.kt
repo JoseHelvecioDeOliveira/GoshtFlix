@@ -1,5 +1,6 @@
 package com.example.goshtflix.data.network
 
+import com.example.goshtflix.data.network.constantes.Constantes.BASE_URL
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -7,7 +8,6 @@ import retrofit2.create
 import okhttp3.logging.HttpLoggingInterceptor
 
 object ApiClient {
-    private const val BASE_URL = "https://api.themoviedb.org/3/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY

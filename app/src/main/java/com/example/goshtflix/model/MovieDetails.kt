@@ -6,7 +6,7 @@ data class MovieDetails(
     val release_date: String,
     val poster_path: String?,
     val genres: List<Genre>,
-    val data_lancamento: String,
+    var budget: Int?,
     val linguagem:String
 )
 
