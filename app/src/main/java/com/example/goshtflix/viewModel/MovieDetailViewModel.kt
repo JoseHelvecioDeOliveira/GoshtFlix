@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 class MovieDetailViewModel : ViewModel() {
 
     private val _movieDetails = MutableLiveData<MovieDetails>()
+
     val movieDetails: LiveData<MovieDetails> = _movieDetails
 
     private val apiKey = "1b4a8c713d7cdd9e2a01e5d4eceb2842"
