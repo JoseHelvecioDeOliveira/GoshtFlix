@@ -1,5 +1,6 @@
 package com.example.goshtflix.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -30,7 +31,8 @@ class MovieAdapter(private val onClick: (Movie) -> Unit) : ListAdapter<Movie, Mo
             binding.title.text = movie.title
 
             // Montar a URL completa para o poster
-            val posterUrl = "https://image.tmdb.org/t/p/w500${movie.poster_path}"
+            val posterUrl = movie.poster_path?.let { "https://image.tmdb.org/t/p/w500$it" }
+                ?: "https://via.placeholder.com/500x750?text=Imagem+Indisponível"  // Fallback para imagem padrão
 
             // Carregar a imagem do poster usando o Coil
             binding.poster.load(posterUrl) {
@@ -48,10 +50,14 @@ class MovieAdapter(private val onClick: (Movie) -> Unit) : ListAdapter<Movie, Mo
 
     class MovieDiffCallback : DiffUtil.ItemCallback<Movie>() {
         override fun areItemsTheSame(oldItem: Movie, newItem: Movie): Boolean {
+            // Adicionando log para verificar o ID dos filmes
+            Log.d("MovieDiffCallback", "Comparando ID: ${oldItem.id} com ${newItem.id}")
             return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(oldItem: Movie, newItem: Movie): Boolean {
+            // Adicionando log para verificar o conteúdo dos filmes
+            Log.d("MovieDiffCallback", "Comparando conteúdo de: ${oldItem.title} com ${newItem.title}")
             return oldItem == newItem
         }
     }

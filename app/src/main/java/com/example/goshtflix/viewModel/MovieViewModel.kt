@@ -1,5 +1,6 @@
 package com.example.goshtflix.viewModel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,7 @@ import com.example.goshtflix.model.Movie
 import kotlinx.coroutines.launch
 
 class MovieViewModel : ViewModel() {
+
 
     private val _popularMovies = MutableLiveData<List<Movie>>()
     val popularMovies: LiveData<List<Movie>> = _popularMovies
@@ -36,36 +38,15 @@ class MovieViewModel : ViewModel() {
 
     private var currentPage = 1
 
-    fun fetchTopRatedMovies() {
-        fetchMovies(
-            fetchFunction = { ApiClient.apiService.getTopRatedMovies(apiKey, currentPage, language) },
-            liveData = _topRatedMovies,
-            appendResults = true
-        )
-    }
-
-    fun fetchNowPlayingMovies() {
-        fetchMovies(
-            fetchFunction = { ApiClient.apiService.getNowPlayingMovies(apiKey, currentPage, language) },
-            liveData = _nowPlayingMovies,
-            appendResults = true
-        )
-    }
-
-    fun fetchUpcomingMovies() {
-        fetchMovies(
-            fetchFunction = { ApiClient.apiService.getUpcomingMovies(apiKey, currentPage, language) },
-            liveData = _upcomingMovies,
-            appendResults = true
-        )
-    }
-
     fun fetchPopularMovies() {
         viewModelScope.launch {
             _isLoading.postValue(true)  // Exibe o ProgressBar
             val response = ApiClient.apiService.getPopularMovies(apiKey, currentPage, language)
             if (response.isSuccessful) {
+                Log.d("MovieViewModel", "Popular movies fetched successfully")
                 _popularMovies.value = response.body()?.results ?: emptyList()
+            } else {
+                Log.e("MovieViewModel", "Erro ao buscar filmes populares: ${response.message()}")
             }
             _isLoading.postValue(false)  // Esconde o ProgressBar após o carregamento
         }
@@ -73,9 +54,40 @@ class MovieViewModel : ViewModel() {
 
     fun searchMovies(query: String) {
         viewModelScope.launch {
-            val response = ApiClient.apiService.searchMovies(apiKey, query, currentPage, language)
-            if (response.isSuccessful) {
-                _popularMovies.value = response.body()?.results ?: emptyList()
+            _isLoading.postValue(true)
+
+            var page = 1
+            val allMovies = mutableListOf<Movie>()
+
+            try {
+                var hasMorePages = true
+
+                while (hasMorePages) {
+                    val response = ApiClient.apiService.searchMovies(apiKey, query, page, language)
+                    if (response.isSuccessful) {
+                        val result = response.body()
+                        val movies = result?.results ?: emptyList()
+                        Log.d("MovieViewModel", "Found ${movies.size} movies on page $page")
+                        allMovies.addAll(movies)
+
+                        // Verifica se a quantidade de resultados da página é menor que o total de resultados
+                        hasMorePages = result?.results?.size ?: 0 < (result?.totalResults ?: 0)
+
+                    } else {
+                        _errorMessage.postValue("Erro: ${response.message()}")
+                        break
+                    }
+
+                    page++
+                }
+
+                _searchResults.postValue(allMovies)  // Atualiza com todos os filmes encontrados
+                Log.d("MovieViewModel", "Search results updated")
+
+            } catch (e: Exception) {
+                _errorMessage.postValue("Erro de conexão: ${e.message}")
+            } finally {
+                _isLoading.postValue(false)
             }
         }
     }
@@ -107,5 +119,4 @@ class MovieViewModel : ViewModel() {
             }
         }
     }
-
 }

@@ -3,8 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     app:cardCornerRadius="8dp"
-    app:cardElevation="6dp"
+    app:cardElevation="10dp"
+    android:backgroundTint="#EAF1FA"
     android:layout_margin="8dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -14,9 +16,8 @@
         <!-- Imagem do poster do filme -->
         <ImageView
             android:id="@+id/poster"
-            android:layout_width="100dp"
-            android:layout_height="150dp"
-            android:layout_marginStart="16dp"
+            android:layout_width="0dp"
+            android:layout_height="200dp"
             android:layout_marginEnd="16dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -29,7 +30,10 @@
             android:id="@+id/title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
+            android:textSize="20sp"
+            tools:text="Homem Aranha"
+            android:gravity="center"
+            android:fontFamily="@font/roboto_bold"
             android:textStyle="bold"
             android:layout_marginEnd="16dp"
             app:layout_constraintStart_toEndOf="@id/poster"
@@ -44,6 +48,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textSize="14sp"
+            android:padding="8dp"
+            android:textStyle="bold"
+            tools:text="Lorem ipsum dolor sit amet, , aliquam ante. Nulla in venenatis purus. Vivamus ac tristique risus. Morbi efficitur vel augue ut mollis. Suspendisse potenti."
+            android:fontFamily="@font/roboto_regular"
             app:layout_constraintStart_toEndOf="@id/poster"
             app:layout_constraintTop_toBottomOf="@id/title"
             app:layout_constraintEnd_toEndOf="parent"
