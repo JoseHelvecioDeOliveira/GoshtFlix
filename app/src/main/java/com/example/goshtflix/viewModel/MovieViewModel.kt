@@ -62,6 +62,13 @@ class MovieViewModel : ViewModel() {
             try {
                 var hasMorePages = true
 
+
+                // Verifica se a query não está vazia antes de fazer a busca
+                if (query.isEmpty()) {
+                    _searchResults.postValue(emptyList())
+                    return@launch
+                }
+
                 while (hasMorePages) {
                     val response = ApiClient.apiService.searchMovies(apiKey, query, page, language)
                     if (response.isSuccessful) {
@@ -69,6 +76,12 @@ class MovieViewModel : ViewModel() {
                         val movies = result?.results ?: emptyList()
                         Log.d("MovieViewModel", "Found ${movies.size} movies on page $page")
                         allMovies.addAll(movies)
+
+                        val filteredMovies = movies.filter { movie ->
+                            movie.title?.contains(query, ignoreCase = true) == true
+                        }
+
+                        allMovies.addAll(filteredMovies)
 
                         // Verifica se a quantidade de resultados da página é menor que o total de resultados
                         hasMorePages = result?.results?.size ?: 0 < (result?.totalResults ?: 0)

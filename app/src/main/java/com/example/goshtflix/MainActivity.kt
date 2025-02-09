@@ -129,6 +129,7 @@ class MainActivity : AppCompatActivity() {
             hideKeyboard()
             binding.searchView.clearFocus() // Remove o foco do EditText após a pesquisa
         } else {
+            viewModel.fetchPopularMovies()
             Toast.makeText(this, "Digite algo para buscar!", Toast.LENGTH_SHORT).show()
         }
     }
