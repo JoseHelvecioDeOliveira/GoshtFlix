@@ -11,27 +11,38 @@
     <!-- Toolbar com botão de voltar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="20dp"
         android:background="@color/primaria"
         android:title="GoshtFlix"
         app:titleTextColor="@color/white"
         android:titleTextColor="@color/white"
-        app:contentInsetStart="32dp"
         app:layout_constraintBottom_toTopOf="@id/posterImageView"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/ivVoltar"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/ivVoltar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_voltar"
+        android:layout_marginTop="20dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="@drawable/ic_voltar" />
+        app:layout_constraintEnd_toStartOf="@id/toolbar"
+        android:padding="16sp"
+        app:layout_constraintBottom_toBottomOf="@id/toolbar"/>
+
 
     <!-- Imagem do Poster -->
     <ImageView
         android:id="@+id/posterImageView"
         android:layout_width="match_parent"
-        android:layout_height="500dp"
+        android:layout_height="550dp"
         android:padding="6dp"
-        android:scaleType="centerCrop"
+        android:scaleType="fitXY"
         app:layout_constraintBottom_toTopOf="@id/titleContainer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -82,21 +93,21 @@
 
             <!-- Texto Valor Arrecadado -->
             <TextView
-                android:id="@+id/txtValorArrcadado"
+                android:id="@+id/txtTitulo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
-                android:text="Valor Arrecadado: "
+                android:text="Titulo "
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tvValor"
+                android:id="@+id/tvTitulo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
-                android:text="$1.000.000"
+                android:text="Sonic..."
                 android:textColor="@color/white"
                 android:textSize="16sp" />
 
@@ -107,6 +118,7 @@
                 android:layout_height="wrap_content"
                 android:padding="5dp"
                 android:text="Gênero"
+                android:visibility="gone"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -116,6 +128,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
+                android:visibility="gone"
                 android:text="Romance, ação e aventura"
                 android:textColor="@color/white"
                 android:textSize="16sp" />
