@@ -17,7 +17,7 @@
         <ImageView
             android:id="@+id/poster"
             android:layout_width="0dp"
-            android:layout_height="200dp"
+            android:layout_height="250dp"
             android:layout_marginEnd="16dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -49,15 +49,56 @@
             android:layout_height="wrap_content"
             android:textSize="14sp"
             android:padding="8dp"
+            android:layout_marginBottom="10dp"
             android:textStyle="bold"
             tools:text="Lorem ipsum dolor sit amet, , aliquam ante. Nulla in venenatis purus. Vivamus ac tristique risus. Morbi efficitur vel augue ut mollis. Suspendisse potenti."
             android:fontFamily="@font/roboto_regular"
             app:layout_constraintStart_toEndOf="@id/poster"
             app:layout_constraintTop_toBottomOf="@id/title"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:maxLines="2"
+            app:layout_constraintBottom_toTopOf="@id/favoriteIcon"
+            android:maxLines="5"
             android:ellipsize="end"/>
+
+        <TextView
+            android:id="@+id/txtDataItem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_bold"
+            android:layout_marginStart="10dp"
+            android:text="Data de lançamento: "
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/tvDataItem"
+            app:layout_constraintStart_toEndOf="@id/poster"
+            app:layout_constraintTop_toBottomOf="@id/overview" />
+
+
+        <TextView
+            android:id="@+id/tvDataItem"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_bold"
+            android:textSize="12sp"
+            android:layout_marginStart="10dp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@id/favoriteIcon"
+            app:layout_constraintEnd_toStartOf="@id/favoriteIcon"
+            app:layout_constraintStart_toEndOf="@id/poster"
+            app:layout_constraintTop_toTopOf="@+id/favoriteIcon"
+            tools:text="11/08/2000" />
+
+
+
+        <ImageView
+            android:id="@+id/favoriteIcon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="6dp"
+            android:src="@drawable/ic_favorito"
+            android:layout_margin="15dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

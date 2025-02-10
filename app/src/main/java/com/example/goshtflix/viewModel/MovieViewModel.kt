@@ -6,11 +6,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.goshtflix.data.network.ApiClient
+import com.example.goshtflix.data.network.TmdbApi
 import com.example.goshtflix.model.Movie
 import kotlinx.coroutines.launch
 
 class MovieViewModel : ViewModel() {
-
 
     private val _popularMovies = MutableLiveData<List<Movie>>()
     val popularMovies: LiveData<List<Movie>> = _popularMovies
@@ -33,18 +33,47 @@ class MovieViewModel : ViewModel() {
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
-
-
     private val apiKey = "1b4a8c713d7cdd9e2a01e5d4eceb2842"
     private val language = "pt-BR"
 
     private var currentPage = 1
 
-    fun fetchPopularMovies() {
+    fun fetchPopularMovies(resetList: Boolean = false) {
         fetchMovies(
             fetchFunction = { ApiClient.apiService.getPopularMovies(apiKey, currentPage, language) },
             liveData = _popularMovies,
-            appendResults = false // Sempre substitui a lista com novos resultados
+            appendResults = false,  // Substitui a lista
+            resetList = resetList // Passa o parâmetro para resetar a lista, se necessário
+        )
+    }
+
+    fun fetchNowPlayingMovies(resetList: Boolean = false) {
+        resetPagination()
+        fetchMovies(
+            fetchFunction = { ApiClient.apiService.getNowPlayingMovies(apiKey, currentPage, language) },
+            liveData = _nowPlayingMovies,
+            appendResults = false,  // Substitui a lista
+            resetList = resetList // Passa o parâmetro resetList para limpar a lista
+        )
+    }
+
+    fun fetchTopRatedMovies(resetList: Boolean = false) {
+        resetPagination()
+        fetchMovies(
+            fetchFunction = { ApiClient.apiService.getTopRatedMovies(apiKey, currentPage, language) },
+            liveData = _topRatedMovies,
+            appendResults = false,  // Substitui a lista
+            resetList = resetList // Passa o parâmetro resetList para limpar a lista
+        )
+    }
+
+    fun fetchUpcomingMovies(resetList: Boolean = false) {
+        resetPagination()
+        fetchMovies(
+            fetchFunction = { ApiClient.apiService.getUpcomingMovies(apiKey, currentPage, language) },
+            liveData = _upcomingMovies,
+            appendResults = false,  // Substitui a lista
+            resetList = resetList // Passa o parâmetro resetList para limpar a lista
         )
     }
 
@@ -53,18 +82,17 @@ class MovieViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.postValue(true)
 
+            if (query.isEmpty()) {
+                _searchResults.postValue(emptyList())
+                _isLoading.postValue(false)
+                return@launch
+            }
+
             var page = 1
             val allMovies = mutableListOf<Movie>()
 
             try {
                 var hasMorePages = true
-
-
-                // Verifica se a query não está vazia antes de fazer a busca
-                if (query.isEmpty()) {
-                    _searchResults.postValue(emptyList())
-                    return@launch
-                }
 
                 while (hasMorePages) {
                     val response = ApiClient.apiService.searchMovies(apiKey, query, page, language)
@@ -74,15 +102,8 @@ class MovieViewModel : ViewModel() {
                         Log.d("MovieViewModel", "Found ${movies.size} movies on page $page")
                         allMovies.addAll(movies)
 
-                        val filteredMovies = movies.filter { movie ->
-                            movie.title?.contains(query, ignoreCase = true) == true
-                        }
-
-                        allMovies.addAll(filteredMovies)
-
-                        // Verifica se a quantidade de resultados da página é menor que o total de resultados
-                        hasMorePages = result?.results?.size ?: 0 < (result?.totalResults ?: 0)
-
+                        // Verifica se há mais páginas
+                        hasMorePages = movies.size < result?.totalResults ?: 0
                     } else {
                         _errorMessage.postValue("Erro: ${response.message()}")
                         break
@@ -91,7 +112,7 @@ class MovieViewModel : ViewModel() {
                     page++
                 }
 
-                _searchResults.postValue(allMovies)  // Atualiza com todos os filmes encontrados
+                _searchResults.postValue(allMovies)
                 Log.d("MovieViewModel", "Search results updated")
 
             } catch (e: Exception) {
@@ -103,26 +124,36 @@ class MovieViewModel : ViewModel() {
     }
 
     fun loadMorePopularMovies() {
-        if (isLoading.value == true) return  // Impede múltiplas chamadas enquanto já estiver carregando
+        if (isLoading.value == true) return // Impede múltiplas chamadas enquanto estiver carregando
 
-        _isLoading.value = true  // Inicia o carregamento
+        _isLoading.value = true // Inicia o carregamento
 
-        currentPage++  // Incrementa a página para a próxima requisição
-        fetchPopularMovies()  // Chama a função para buscar os filmes da próxima página
+        currentPage++ // Incrementa a página para a próxima requisição
+        fetchPopularMovies() // Chama a função para buscar os filmes da próxima página
     }
 
     private fun fetchMovies(
         fetchFunction: suspend () -> retrofit2.Response<com.example.goshtflix.model.MovieResponse>,
         liveData: MutableLiveData<List<Movie>>,
-        appendResults: Boolean
+        appendResults: Boolean,
+        resetList: Boolean = false  // Novo parâmetro para resetar a lista
     ) {
         viewModelScope.launch {
             _isLoading.postValue(true)
+
+            // Se resetList for true, limpa a lista antes de carregar novos dados
+            if (resetList) {
+                liveData.postValue(emptyList()) // Limpa a lista
+                resetPagination()  // Reinicia a paginação
+            }
+
             try {
                 val response = fetchFunction()
                 if (response.isSuccessful) {
                     val newMovies = response.body()?.results ?: emptyList()
-                    liveData.postValue(if (appendResults) liveData.value.orEmpty() + newMovies else newMovies)
+                    liveData.postValue(
+                        if (appendResults) liveData.value.orEmpty() + newMovies else newMovies
+                    )
                 } else {
                     _errorMessage.postValue("Erro: ${response.message()}")
                 }
@@ -132,5 +163,14 @@ class MovieViewModel : ViewModel() {
                 _isLoading.postValue(false)
             }
         }
+}
+    fun resetPagination() {
+        currentPage = 1  // Reinicia a página
+        _popularMovies.value = emptyList() // Limpa a lista de filmes populares
+        _nowPlayingMovies.value = emptyList() // Limpa a lista de filmes em exibição
+        _topRatedMovies.value = emptyList() // Limpa a lista de filmes mais bem avaliados
+        _upcomingMovies.value = emptyList() // Limpa a lista de filmes futuros
     }
+
+
 }

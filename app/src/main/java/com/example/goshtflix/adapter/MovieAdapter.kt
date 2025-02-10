@@ -32,20 +32,36 @@ class MovieAdapter(private val onClick: (Movie) -> Unit) : ListAdapter<Movie, Mo
 
             // Montar a URL completa para o poster
             val posterUrl = movie.poster_path?.let { "https://image.tmdb.org/t/p/w500$it" }
-                ?: "https://via.placeholder.com/500x750?text=Imagem+Indisponível"  // Fallback para imagem padrão
+                ?: "https://via.placeholder.com/500x750?text=Imagem+Indisponível"
 
             // Carregar a imagem do poster usando o Coil
             binding.poster.load(posterUrl) {
-                crossfade(true) // Habilitar animação de transição (opcional)
-                placeholder(R.drawable.placeholder) // Imagem de placeholder enquanto carrega
-                error(R.drawable.ic_error) // Imagem de erro, caso falhe no carregamento
+                crossfade(true) // Habilitar animação de transição
+                placeholder(R.drawable.placeholder)
+                error(R.drawable.ic_error)
             }
 
             binding.overview.text = movie.overview
 
+            // Exibir a data de lançamento
+            movie.release_date?.let {
+                val formattedDate = formatDate(it)
+                binding.tvDataItem.text = formattedDate
+            }
+
             // Configurar o clique na view
             binding.root.setOnClickListener { onClick(movie) }
         }
+
+        private fun formatDate(date: String): String {
+
+            val dateParts = date.split("-")
+            if (dateParts.size == 3) {
+                return "${dateParts[2]}/${dateParts[1]}/${dateParts[0]}"
+            }
+            return date // Caso não consiga formatar, retorna a data original
+        }
+
     }
 
     class MovieDiffCallback : DiffUtil.ItemCallback<Movie>() {

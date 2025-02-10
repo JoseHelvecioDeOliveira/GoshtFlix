@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:padding="12dp"
-        app:layout_constraintBottom_toTopOf="@id/recyclerView">
+        app:layout_constraintBottom_toTopOf="@id/botaoCategoria">
 
     <EditText
         android:id="@+id/searchView"
@@ -37,7 +37,6 @@
         android:layout_marginTop="16dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
         <ImageView
@@ -77,14 +76,46 @@
         app:layout_constraintTop_toTopOf="parent"
         android:padding="8dp" />
 
-
     <!-- RecyclerView para exibir a lista de filmes -->
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/botaoCategoria"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="10dp"
+        android:background="@color/primaria"
+        android:fontFamily="@font/roboto_bold"
+        android:src="@drawable/ic_filtro"
+        android:text="Categoria"
+        android:textSize="14dp"
+        android:textStyle="bold"
+        android:tint="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/recyclerView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/constraintSearch">
+
+    </androidx.appcompat.widget.AppCompatImageButton>
+
+    <ImageView
+        android:id="@+id/favoriteIcon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:padding="6dp"
+        android:src="@drawable/ic_favorito"
+        android:layout_margin="15dp"
+        app:layout_constraintBottom_toBottomOf="@id/botaoCategoria"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/botaoCategoria"
+        app:tint="@color/white" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:padding="10dp"
-        app:layout_constraintTop_toBottomOf="@id/constraintSearch"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/botaoCategoria"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>

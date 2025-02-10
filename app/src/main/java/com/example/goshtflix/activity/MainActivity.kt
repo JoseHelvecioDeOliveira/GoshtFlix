@@ -1,5 +1,6 @@
 package com.example.goshtflix.activity
 
+import FilterBottomSheetFragment
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -23,7 +24,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var movieAdapter: MovieAdapter
     private val viewModel: MovieViewModel by viewModels()
-    private var progressVisibleForAtLeast5Seconds = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +34,16 @@ class MainActivity : AppCompatActivity() {
         setupObservers()
         setupSearchView()
 
-        viewModel.fetchPopularMovies()
+        viewModel.fetchPopularMovies(resetList = false)
+        viewModel.fetchNowPlayingMovies(resetList = false)
+        viewModel.fetchTopRatedMovies(resetList = false)
+        viewModel.fetchUpcomingMovies(resetList = false)
+
+
+        // Configura o botão de Categoria para abrir o BottomSheet
+        binding.botaoCategoria.setOnClickListener {
+            showFilterBottomSheet()
+        }
     }
 
     private fun setupRecyclerView() {
@@ -71,27 +80,41 @@ class MainActivity : AppCompatActivity() {
     private fun setupObservers() {
         // Observa os filmes populares
         viewModel.popularMovies.observe(this) { movies ->
-            if (movies.isNotEmpty()) {
-                movieAdapter.submitList(movies)
+            if (movies.isNotEmpty() && movieAdapter.currentList != movies) {
+                movieAdapter.submitList(movies)  // Atualiza a lista apenas se os filmes mudaram
             }
             hideProgress() // Esconde o progresso após a lista de filmes ser atualizada
         }
 
-        viewModel.isLoading.observe(this) { isLoading ->
-            if (isLoading) {
-                showProgress()  // Exibe o progresso enquanto está carregando
-            } else {
-                hideProgress()  // Esconde o progresso quando o carregamento é concluído
+        viewModel.nowPlayingMovies.observe(this) { movies ->
+            if (movies.isNotEmpty() && movieAdapter.currentList != movies) {
+                movieAdapter.submitList(movies)
             }
+            hideProgress()
+        }
+
+        viewModel.topRatedMovies.observe(this) { movies ->
+            if (movies.isNotEmpty() && movieAdapter.currentList != movies) {
+                movieAdapter.submitList(movies)
+            }
+            hideProgress()
+        }
+
+        viewModel.upcomingMovies.observe(this) { movies ->
+            if (movies.isNotEmpty() && movieAdapter.currentList != movies) {
+                movieAdapter.submitList(movies)
+            }
+            hideProgress()
         }
 
         // Observa os resultados da pesquisa
         viewModel.searchResults.observe(this) { movies ->
             if (movies.isEmpty()) {
-                Toast.makeText(this, "Nenhum filme encontrado para sua busca.", Toast.LENGTH_SHORT)
-                    .show()
+                Toast.makeText(this, "Nenhum filme encontrado para sua busca.", Toast.LENGTH_SHORT).show()
             }
-            movieAdapter.submitList(movies)
+            if (movieAdapter.currentList != movies) {
+                movieAdapter.submitList(movies)
+            }
         }
 
         // Observa o estado de carregamento
@@ -104,11 +127,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Observa mensagens de erro
-        viewModel.errorMessage.observe(this) { message ->
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-        }
     }
+
 
     private fun setupSearchView() {
         // Garante que ao clicar no constraintSearch, o EditText receba foco
@@ -131,11 +151,12 @@ class MainActivity : AppCompatActivity() {
     private fun executeSearch(query: String) {
         if (query.isNotEmpty()) {
             // Chama o ViewModel para buscar todos os filmes para o termo de pesquisa
+            viewModel.fetchPopularMovies()
             viewModel.searchMovies(query)
             hideKeyboard()
-            binding.searchView.clearFocus() // Remove o foco do EditText após a pesquisa
+            binding.searchView.clearFocus()
         } else {
-            viewModel.fetchPopularMovies()
+            viewModel.fetchPopularMovies() // Reseta a lista quando a pesquisa estiver vazia
             Toast.makeText(this, "Digite algo para buscar!", Toast.LENGTH_SHORT).show()
         }
     }
@@ -150,9 +171,28 @@ class MainActivity : AppCompatActivity() {
         imm.hideSoftInputFromWindow(binding.searchView.windowToken, 0)
     }
 
+    private fun showFilterBottomSheet() {
+        val bottomSheetFragment = FilterBottomSheetFragment { filter ->
+            // Aqui você chama o método da API com base no filtro selecionado
+            when (filter) {
+                "now_playing" -> {
+                    viewModel.fetchNowPlayingMovies(resetList = true) }
+                "top_rated" -> {
+                    viewModel.fetchTopRatedMovies(resetList = true)  // Passa resetList = true para limpar a lista
+                }
+                "upcoming" -> {
+                    viewModel.fetchUpcomingMovies(resetList = true)  // Passa resetList = true para limpar a lista
+                }
+            }
+        }
+        bottomSheetFragment.show(supportFragmentManager, bottomSheetFragment.tag)
+    }
+
     private fun showProgress() {
         binding.progressBar.visibility = View.VISIBLE
         binding.recyclerView.visibility = View.GONE
+        binding.favoriteIcon.visibility = View.GONE
+        binding.botaoCategoria.visibility = View.GONE
         binding.constraintSearch.visibility = View.GONE
     }
 
@@ -160,5 +200,7 @@ class MainActivity : AppCompatActivity() {
         binding.progressBar.visibility = View.GONE
         binding.recyclerView.visibility = View.VISIBLE
         binding.constraintSearch.visibility = View.VISIBLE
+        binding.favoriteIcon.visibility = View.VISIBLE
+        binding.botaoCategoria.visibility = View.VISIBLE
     }
 }
