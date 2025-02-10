@@ -1,5 +1,6 @@
 package com.example.goshtflix.data.network
 
+import MovieTranslationResponse
 import com.example.goshtflix.model.MovieDetails
 import com.example.goshtflix.model.MovieResponse
 import com.example.goshtflix.model.MovieTranslation
@@ -56,7 +57,7 @@ interface TmdbApi {
 
     @GET("movie/{id}/translations")
     suspend fun getMovieTranslations(
-        @Query("api_key") apiKey: String,
-        @Path("id") movieId: Int
-    ): Response<List<MovieTranslation>>
+        @Path("id") movieId: Int,
+        @Query("api_key") apiKey: String
+    ): Response<MovieTranslationResponse>
 }

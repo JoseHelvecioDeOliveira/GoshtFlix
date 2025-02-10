@@ -48,9 +48,9 @@ class MovieDetailViewModel : ViewModel() {
                 }
 
                 // Se a tradução não estiver na resposta principal, pegue do endpoint de traduções
-                val translationResponse = ApiClient.apiService.getMovieTranslations(apiKey, movieId)
+                val translationResponse = ApiClient.apiService.getMovieTranslations(movieId, apiKey)
                 if (translationResponse.isSuccessful) {
-                    val translations = translationResponse.body()
+                    val translations = translationResponse.body()?.translations
                     translations?.let {
                         val ptTranslation = it.find { translation -> translation.iso_639_1 == "pt" }
                         ptTranslation?.let { translation ->

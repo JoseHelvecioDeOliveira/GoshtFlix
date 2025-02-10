@@ -10,5 +10,5 @@ data class Movie(
     val genres: List<Genre>,
     var budget: Int?,
     val formattedBudget: String?,
-    val linguagem:String
+    val linguagem: String
 )

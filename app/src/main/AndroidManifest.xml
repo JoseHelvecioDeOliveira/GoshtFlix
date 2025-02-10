@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!--Permissao para o uso da internet-->
+    <!-- Permissão para o uso da internet -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -15,23 +15,34 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GoshtFlix"
         tools:targetApi="31">
+
+        <!-- SplashScreenActivity como a primeira activity -->
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
+            android:name=".activity.SplashScreenActivity"
+            android:exported="true"
+            android:theme="@style/SplashTheme"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".activity.MovieDetailActivity">
+        <!-- MainActivity -->
+        <activity
+            android:name=".activity.MainActivity"
+            android:label="@string/app_name">
 
+        </activity>
+        <!-- MovieDetailActivity -->
+        <activity
+            android:name=".activity.MovieDetailActivity">
         </activity>
 
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
+
     </application>
 
 </manifest>

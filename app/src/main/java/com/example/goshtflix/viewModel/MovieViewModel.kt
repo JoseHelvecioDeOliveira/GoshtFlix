@@ -33,24 +33,21 @@ class MovieViewModel : ViewModel() {
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
+
+
     private val apiKey = "1b4a8c713d7cdd9e2a01e5d4eceb2842"
     private val language = "pt-BR"
 
     private var currentPage = 1
 
     fun fetchPopularMovies() {
-        viewModelScope.launch {
-            _isLoading.postValue(true)  // Exibe o ProgressBar
-            val response = ApiClient.apiService.getPopularMovies(apiKey, currentPage, language)
-            if (response.isSuccessful) {
-                Log.d("MovieViewModel", "Popular movies fetched successfully")
-                _popularMovies.value = response.body()?.results ?: emptyList()
-            } else {
-                Log.e("MovieViewModel", "Erro ao buscar filmes populares: ${response.message()}")
-            }
-            _isLoading.postValue(false)  // Esconde o ProgressBar após o carregamento
-        }
+        fetchMovies(
+            fetchFunction = { ApiClient.apiService.getPopularMovies(apiKey, currentPage, language) },
+            liveData = _popularMovies,
+            appendResults = false // Sempre substitui a lista com novos resultados
+        )
     }
+
 
     fun searchMovies(query: String) {
         viewModelScope.launch {
@@ -106,8 +103,12 @@ class MovieViewModel : ViewModel() {
     }
 
     fun loadMorePopularMovies() {
-        currentPage++
-        fetchPopularMovies()
+        if (isLoading.value == true) return  // Impede múltiplas chamadas enquanto já estiver carregando
+
+        _isLoading.value = true  // Inicia o carregamento
+
+        currentPage++  // Incrementa a página para a próxima requisição
+        fetchPopularMovies()  // Chama a função para buscar os filmes da próxima página
     }
 
     private fun fetchMovies(

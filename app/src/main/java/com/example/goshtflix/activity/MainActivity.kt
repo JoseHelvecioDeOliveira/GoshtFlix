@@ -1,6 +1,5 @@
-package com.example.goshtflix
+package com.example.goshtflix.activity
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -11,21 +10,13 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SearchView
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.goshtflix.activity.MovieDetailActivity
 import com.example.goshtflix.adapter.MovieAdapter
 import com.example.goshtflix.databinding.ActivityMainBinding
 import com.example.goshtflix.viewModel.MovieViewModel
-import com.google.android.material.internal.ViewUtils.hideKeyboard
-import com.google.android.material.internal.ViewUtils.showKeyboard
 
 class MainActivity : AppCompatActivity() {
 
@@ -67,8 +58,10 @@ class MainActivity : AppCompatActivity() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
                     if (!recyclerView.canScrollVertically(1)) {
-                        // Carregar mais filmes quando o usuário rolar até o final
-                        viewModel.loadMorePopularMovies()
+                        showProgress()
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            viewModel.loadMorePopularMovies()
+                        }, 2000)
                     }
                 }
             })
@@ -78,13 +71,25 @@ class MainActivity : AppCompatActivity() {
     private fun setupObservers() {
         // Observa os filmes populares
         viewModel.popularMovies.observe(this) { movies ->
-            movieAdapter.submitList(movies)
+            if (movies.isNotEmpty()) {
+                movieAdapter.submitList(movies)
+            }
+            hideProgress() // Esconde o progresso após a lista de filmes ser atualizada
+        }
+
+        viewModel.isLoading.observe(this) { isLoading ->
+            if (isLoading) {
+                showProgress()  // Exibe o progresso enquanto está carregando
+            } else {
+                hideProgress()  // Esconde o progresso quando o carregamento é concluído
+            }
         }
 
         // Observa os resultados da pesquisa
         viewModel.searchResults.observe(this) { movies ->
             if (movies.isEmpty()) {
-                Toast.makeText(this, "Nenhum filme encontrado para sua busca.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Nenhum filme encontrado para sua busca.", Toast.LENGTH_SHORT)
+                    .show()
             }
             movieAdapter.submitList(movies)
         }
@@ -93,8 +98,9 @@ class MainActivity : AppCompatActivity() {
         viewModel.isLoading.observe(this) { isLoading ->
             if (isLoading) {
                 showProgress()
-            } else {
-                hideProgress()
+                Handler(Looper.getMainLooper()).postDelayed({
+                    hideProgress()
+                }, 2000)
             }
         }
 
