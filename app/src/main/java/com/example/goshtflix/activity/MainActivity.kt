@@ -83,28 +83,24 @@ class MainActivity : AppCompatActivity() {
             if (movies.isNotEmpty() && movieAdapter.currentList != movies) {
                 movieAdapter.submitList(movies)  // Atualiza a lista apenas se os filmes mudaram
             }
-            hideProgress() // Esconde o progresso após a lista de filmes ser atualizada
         }
 
         viewModel.nowPlayingMovies.observe(this) { movies ->
             if (movies.isNotEmpty() && movieAdapter.currentList != movies) {
                 movieAdapter.submitList(movies)
             }
-            hideProgress()
         }
 
         viewModel.topRatedMovies.observe(this) { movies ->
             if (movies.isNotEmpty() && movieAdapter.currentList != movies) {
                 movieAdapter.submitList(movies)
             }
-            hideProgress()
         }
 
         viewModel.upcomingMovies.observe(this) { movies ->
             if (movies.isNotEmpty() && movieAdapter.currentList != movies) {
                 movieAdapter.submitList(movies)
             }
-            hideProgress()
         }
 
         // Observa os resultados da pesquisa
@@ -126,7 +122,7 @@ class MainActivity : AppCompatActivity() {
                 }, 2000)
             }
         }
-
+        hideProgress()
     }
 
 
@@ -151,12 +147,11 @@ class MainActivity : AppCompatActivity() {
     private fun executeSearch(query: String) {
         if (query.isNotEmpty()) {
             // Chama o ViewModel para buscar todos os filmes para o termo de pesquisa
-            viewModel.fetchPopularMovies()
             viewModel.searchMovies(query)
             hideKeyboard()
             binding.searchView.clearFocus()
         } else {
-            viewModel.fetchPopularMovies() // Reseta a lista quando a pesquisa estiver vazia
+            hideKeyboard()
             Toast.makeText(this, "Digite algo para buscar!", Toast.LENGTH_SHORT).show()
         }
     }

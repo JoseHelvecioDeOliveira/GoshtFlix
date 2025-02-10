@@ -1,5 +1,6 @@
 package com.example.goshtflix.activity
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
@@ -21,14 +22,14 @@ class MovieDetailActivity : AppCompatActivity() {
 
     private lateinit var movieDetailViewModel: MovieDetailViewModel
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_movie_detail)
 
-        val toolbar: MaterialToolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
+        val voltar: ImageView = findViewById(R.id.ivVoltar)
 
-        toolbar.setNavigationOnClickListener {
+        voltar.setOnClickListener {
             onBackPressed()
         }
 
@@ -43,8 +44,8 @@ class MovieDetailActivity : AppCompatActivity() {
         val movieOverview = intent.getStringExtra("movieOverview") ?: "No Overview"
         val moviePoster = intent.getStringExtra("moviePoster") ?: ""
         val movieReleaseDate = intent.getStringExtra("movieReleaseDate") ?: "No Release Date"
-        val movieBudget = intent.getIntExtra("movieBudget", -1)
-        val movieGenres = intent.getStringExtra("movieGenres") ?: "No Genres"
+//        val movieBudget = intent.getIntExtra("movieBudget", -1)
+//        val movieGenres = intent.getStringExtra("movieGenres") ?: "No Genres"
 
         // Formatar a data de lançamento
         val formattedReleaseDate = formatDate(movieReleaseDate)
@@ -59,16 +60,17 @@ class MovieDetailActivity : AppCompatActivity() {
         val titleToolbar: MaterialToolbar = findViewById(R.id.toolbar)
         val overviewTextView: TextView = findViewById(R.id.tvOverview)
         val posterImageView: ImageView = findViewById(R.id.posterImageView)
-        val movieBudgetTextView: TextView = findViewById(R.id.tvValor)
+        val tvTitulo: TextView = findViewById(R.id.tvTitulo)
         val movieDataTextView: TextView = findViewById(R.id.tvData)  // Aqui você vai exibir a data formatada
-        val movieGenresTextView: TextView = findViewById(R.id.tvGenero)
+        //val movieGenresTextView: TextView = findViewById(R.id.tvGenero)
 
         // Atribuindo os valores às Views
         titleTextView.text = movieTitle
-        titleToolbar.title = movieTitle
+        tvTitulo.text = movieTitle
+        titleToolbar.title = "GoshtFlix"
         overviewTextView.text = movieOverview
-        movieBudgetTextView.text = "R$ $movieBudget"
-        movieGenresTextView.text = movieGenres  // Exibir os gêneros aqui, não a data
+        //movieBudgetTextView.text = "R$ $movieBudget"
+       // movieGenresTextView.text = movieGenres
         movieDataTextView.text = formattedReleaseDate  // Aqui a data formatada será exibida
 
         // Exibindo o poster do filme
@@ -82,8 +84,8 @@ class MovieDetailActivity : AppCompatActivity() {
 
         // Observar mudanças nos detalhes do filme (se necessário)
         movieDetailViewModel.movieDetails.observe(this, Observer { movie ->
-            movieBudgetTextView.text = movie.formattedBudget
-            movieGenresTextView.text = movie.genres.toString()
+           // movieBudgetTextView.text = movie.formattedBudget
+            //movieGenresTextView.text = movie.genres.toString()
         })
     }
 
