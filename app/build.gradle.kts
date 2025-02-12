@@ -59,6 +59,7 @@ dependencies {
     implementation (libs.material.v140)
     implementation (libs.kotlinx.coroutines.core)
     implementation (libs.coil)
+    implementation(libs.room.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

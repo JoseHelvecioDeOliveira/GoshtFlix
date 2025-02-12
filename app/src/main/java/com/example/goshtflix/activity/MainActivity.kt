@@ -13,9 +13,12 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.util.query
 import com.example.goshtflix.adapter.MovieAdapter
+import com.example.goshtflix.data.network.enums.MovieCategory
 import com.example.goshtflix.databinding.ActivityMainBinding
 import com.example.goshtflix.viewModel.MovieViewModel
 
@@ -23,6 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var movieAdapter: MovieAdapter
+    private var currentCategory: MovieCategory? = null
     private val viewModel: MovieViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,9 +39,6 @@ class MainActivity : AppCompatActivity() {
         setupSearchView()
 
         viewModel.fetchPopularMovies(resetList = false)
-        viewModel.fetchNowPlayingMovies(resetList = false)
-        viewModel.fetchTopRatedMovies(resetList = false)
-        viewModel.fetchUpcomingMovies(resetList = false)
 
 
         // Configura o botão de Categoria para abrir o BottomSheet
@@ -69,7 +70,21 @@ class MainActivity : AppCompatActivity() {
                     if (!recyclerView.canScrollVertically(1)) {
                         showProgress()
                         Handler(Looper.getMainLooper()).postDelayed({
-                            viewModel.loadMorePopularMovies()
+                            // Verifica se currentCategory é null e, se for, define a categoria como POPULAR
+                            val category = currentCategory ?: MovieCategory.POPULAR
+
+                            when (category) {
+                                MovieCategory.SEARCH -> {
+                                    val query = binding.searchView.text.toString()
+                                    viewModel.loadMoreSearchResults(query)
+                                }
+
+                                MovieCategory.NOW_PLAYING -> viewModel.loadMoreMovies(category)
+                                MovieCategory.TOP_RATED -> viewModel.loadMoreMovies(category)
+                                MovieCategory.UPCOMING -> viewModel.loadMoreMovies(category)
+                                MovieCategory.POPULAR -> viewModel.loadMoreMovies(category)
+
+                            }
                         }, 2000)
                     }
                 }
@@ -106,7 +121,8 @@ class MainActivity : AppCompatActivity() {
         // Observa os resultados da pesquisa
         viewModel.searchResults.observe(this) { movies ->
             if (movies.isEmpty()) {
-                Toast.makeText(this, "Nenhum filme encontrado para sua busca.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Nenhum filme encontrado para sua busca.", Toast.LENGTH_SHORT)
+                    .show()
             }
             if (movieAdapter.currentList != movies) {
                 movieAdapter.submitList(movies)
@@ -146,15 +162,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun executeSearch(query: String) {
         if (query.isNotEmpty()) {
+            currentCategory = MovieCategory.SEARCH
+
             // Chama o ViewModel para buscar todos os filmes para o termo de pesquisa
             viewModel.searchMovies(query)
             hideKeyboard()
             binding.searchView.clearFocus()
         } else {
             hideKeyboard()
+            currentCategory = MovieCategory.POPULAR
             Toast.makeText(this, "Digite algo para buscar!", Toast.LENGTH_SHORT).show()
         }
     }
+
 
     private fun showKeyboard(view: View) {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -168,20 +188,25 @@ class MainActivity : AppCompatActivity() {
 
     private fun showFilterBottomSheet() {
         val bottomSheetFragment = FilterBottomSheetFragment { filter ->
-            // Aqui você chama o método da API com base no filtro selecionado
-            when (filter) {
-                "now_playing" -> {
-                    viewModel.fetchNowPlayingMovies(resetList = true) }
-                "top_rated" -> {
-                    viewModel.fetchTopRatedMovies(resetList = true)  // Passa resetList = true para limpar a lista
-                }
-                "upcoming" -> {
-                    viewModel.fetchUpcomingMovies(resetList = true)  // Passa resetList = true para limpar a lista
-                }
+            val selectedCategory = MovieCategory.fromString(filter)
+
+            // Atualiza a categoria selecionada
+            selectedCategory?.let {
+                currentCategory = it
+                viewModel.setCurrentCategory(it)
+            }
+
+            // Chama o método da API com base no filtro selecionado
+            when (selectedCategory) {
+                MovieCategory.NOW_PLAYING -> viewModel.fetchNowPlayingMovies(resetList = true)
+                MovieCategory.TOP_RATED -> viewModel.fetchTopRatedMovies(resetList = true)
+                MovieCategory.UPCOMING -> viewModel.fetchUpcomingMovies(resetList = true)
+                else -> {}
             }
         }
         bottomSheetFragment.show(supportFragmentManager, bottomSheetFragment.tag)
     }
+
 
     private fun showProgress() {
         binding.progressBar.visibility = View.VISIBLE

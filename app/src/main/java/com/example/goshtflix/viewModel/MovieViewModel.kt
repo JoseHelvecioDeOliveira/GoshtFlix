@@ -5,8 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.util.query
 import com.example.goshtflix.data.network.ApiClient
-import com.example.goshtflix.data.network.TmdbApi
+import com.example.goshtflix.data.network.enums.MovieCategory
 import com.example.goshtflix.model.Movie
 import kotlinx.coroutines.launch
 
@@ -33,10 +34,20 @@ class MovieViewModel : ViewModel() {
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
+    private val _currentCategory = MutableLiveData<MovieCategory>()
+    val currentCategory: LiveData<MovieCategory> get() = _currentCategory
+
     private val apiKey = "1b4a8c713d7cdd9e2a01e5d4eceb2842"
     private val language = "pt-BR"
 
     private var currentPage = 1
+    private var searchPage = 1
+
+
+    // Função para definir a categoria no ViewModel
+    fun setCurrentCategory(category: MovieCategory) {
+        _currentCategory.value = category
+    }
 
     fun fetchPopularMovies(resetList: Boolean = false) {
         fetchMovies(
@@ -88,7 +99,7 @@ class MovieViewModel : ViewModel() {
                 return@launch
             }
 
-            var page = 1
+            var page = searchPage  // Usando a página de pesquisa
             val allMovies = mutableListOf<Movie>()
 
             try {
@@ -109,7 +120,7 @@ class MovieViewModel : ViewModel() {
                         break
                     }
 
-                    page++
+                    page++ // Incrementa a página de pesquisa
                 }
 
                 _searchResults.postValue(allMovies)
@@ -123,13 +134,60 @@ class MovieViewModel : ViewModel() {
         }
     }
 
-    fun loadMorePopularMovies() {
-        if (isLoading.value == true) return // Impede múltiplas chamadas enquanto estiver carregando
+
+    fun loadMoreMovies(category: MovieCategory) {
+        if (isLoading.value == true) return // Impede múltiplas chamadas enquanto você carrega
+        _isLoading.value = true // Inicia o carregamento
+
+        when (category) {
+            MovieCategory.NOW_PLAYING -> {
+                currentPage++
+                fetchMovies(
+                    fetchFunction = { ApiClient.apiService.getNowPlayingMovies(apiKey, currentPage, language) },
+                    liveData = _nowPlayingMovies,
+                    appendResults = true
+                )
+            }
+            MovieCategory.TOP_RATED -> {
+                currentPage++
+                fetchMovies(
+                    fetchFunction = { ApiClient.apiService.getTopRatedMovies(apiKey, currentPage, language) },
+                    liveData = _topRatedMovies,
+                    appendResults = true
+                )
+            }
+            MovieCategory.UPCOMING -> {
+                currentPage++
+                fetchMovies(
+                    fetchFunction = { ApiClient.apiService.getUpcomingMovies(apiKey, currentPage, language) },
+                    liveData = _upcomingMovies,
+                    appendResults = true
+                )
+            }
+
+            else -> {
+                currentPage++
+                fetchMovies(
+                    fetchFunction = { ApiClient.apiService.getPopularMovies(apiKey, currentPage, language) }, // Alterado para popular
+                    liveData = _popularMovies, // Alterado para a LiveData de filmes populares
+                    appendResults = true
+                )
+            }
+        }
+    }
+
+    fun loadMoreSearchResults(query: String) {
+        if (_isLoading.value == true) return // Impede múltiplas chamadas enquanto você carrega
 
         _isLoading.value = true // Inicia o carregamento
 
-        currentPage++ // Incrementa a página para a próxima requisição
-        fetchPopularMovies() // Chama a função para buscar os filmes da próxima página
+        resetPagination()
+
+        // Incrementa a página da pesquisa
+        searchPage++
+
+        // Chama a função de pesquisa com a página atual
+        searchMovies(query)
     }
 
     private fun fetchMovies(
