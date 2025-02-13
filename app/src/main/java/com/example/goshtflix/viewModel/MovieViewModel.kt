@@ -1,20 +1,35 @@
 package com.example.goshtflix.viewModel
 
+import android.app.Application
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.Room
 import androidx.room.util.query
+import com.example.goshtflix.activity.GoshtFlixApplication
+import com.example.goshtflix.dao.AppDatabase
 import com.example.goshtflix.data.network.ApiClient
+import com.example.goshtflix.data.network.TmdbApi
 import com.example.goshtflix.data.network.enums.MovieCategory
 import com.example.goshtflix.model.Movie
+import com.example.goshtflix.repository.UserDataRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.Dispatcher
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody
 
 class MovieViewModel : ViewModel() {
 
     private val _popularMovies = MutableLiveData<List<Movie>>()
     val popularMovies: LiveData<List<Movie>> = _popularMovies
+
+    private val _favoriteMovies = MutableLiveData<List<Movie>>()
+    val favoriteMovies: LiveData<List<Movie>> get() = _favoriteMovies
 
     private val _topRatedMovies = MutableLiveData<List<Movie>>()
     val topRatedMovies: LiveData<List<Movie>> = _topRatedMovies
@@ -34,14 +49,23 @@ class MovieViewModel : ViewModel() {
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
+    private val _isFavoriteAdded = MutableLiveData<Boolean>()
+    val isFavoriteAdded: LiveData<Boolean> = _isFavoriteAdded
+
     private val _currentCategory = MutableLiveData<MovieCategory>()
     val currentCategory: LiveData<MovieCategory> get() = _currentCategory
 
-    private val apiKey = "1b4a8c713d7cdd9e2a01e5d4eceb2842"
+    private val apiKey = "b71194cca373717f10d8a8097d439a22"
     private val language = "pt-BR"
+    private val autorization = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiNzExOTRjY2EzNzM3MTdmMTBkOGE4MDk3ZDQzOWEyMiIsIm5iZiI6MTYyMzkzNDMxNy4zMzQsInN1YiI6IjYwY2I0NTZkNDJkOGE1MDAyOThjZWMyMSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.oFaUOSbESbeclymQG6Wb3EWJpMdkQSKWA_aYr8jlIUY"
 
     private var currentPage = 1
     private var searchPage = 1
+
+    private val userDao = GoshtFlixApplication.database?.userDao()
+    private var repositoryUser = userDao.let {
+        it?.let { it1 -> UserDataRepository(it1) }
+    }
 
 
     // Função para definir a categoria no ViewModel
@@ -88,6 +112,24 @@ class MovieViewModel : ViewModel() {
         )
     }
 
+    fun fetchFavoriteMovies(accountId: String, sortBy: String, resetList: Boolean = false) {
+        resetPagination()
+        fetchMovies(
+            fetchFunction = {
+                // Passando o accountId, language, page, Authorization header e sortBy query param para o endpoint
+                ApiClient.apiService.getFavoriteMovies(
+                    accountId = accountId,
+                    language = language,
+                    page = currentPage,
+                    autorization = "Bearer $apiKey", // Assumindo que apiKey é o token de autenticação
+                    sortBy = sortBy
+                )
+            },
+            liveData = _upcomingMovies,
+            appendResults = false,  // Substitui a lista
+            resetList = resetList  // Passa o parâmetro resetList para limpar a lista
+        )
+    }
 
     fun searchMovies(query: String) {
         viewModelScope.launch {
@@ -134,7 +176,6 @@ class MovieViewModel : ViewModel() {
         }
     }
 
-
     fun loadMoreMovies(category: MovieCategory) {
         if (isLoading.value == true) return // Impede múltiplas chamadas enquanto você carrega
         _isLoading.value = true // Inicia o carregamento
@@ -164,6 +205,24 @@ class MovieViewModel : ViewModel() {
                     appendResults = true
                 )
             }
+            MovieCategory.FAVORITE -> {
+                currentPage++
+                fetchMovies(
+                    fetchFunction = {
+                        // Chamando o endpoint correto para buscar filmes favoritos
+                        ApiClient.apiService.getFavoriteMovies(
+                            accountId = "10629053", // Substitua pelo ID da conta do usuário
+                            language = language, // Certifique-se de que está passando o parâmetro de idioma corretamente
+                            page = currentPage, // Página atual para paginar os resultados
+                            autorization = "Bearer $apiKey", // Usando o token para autorização
+                            sortBy = "popularity.desc" // Ordenação desejada
+                        )
+                    },
+                    liveData = _favoriteMovies, // Assumindo que você está atualizando uma LiveData com os filmes favoritos
+                    appendResults = true // Adicionando resultados à lista existente
+                )
+            }
+
 
             else -> {
                 currentPage++
@@ -231,4 +290,108 @@ class MovieViewModel : ViewModel() {
     }
 
 
+    fun getFavoriteMoviesLister(accountId: String, language: String, page: Int, sortBy: String) {
+        viewModelScope.launch {
+            try {
+                val response = ApiClient.apiService.getFavoriteMovies(accountId, language, page, autorization, sortBy)
+
+                if (response.isSuccessful) {
+                    _favoriteMovies.value = response.body()?.results ?: emptyList()
+                } else {
+
+                    Log.e("MovieViewModel", "Erro ao buscar filmes favoritos: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("MovieViewModel", "Erro ao buscar filmes favoritos: ${e.message}")
+            }
+        }
+    }
+    fun toggleFavoriteStatus(movie: Movie) {
+        viewModelScope.launch {
+            // Alterna o status de favorito
+            val newFavoriteStatus = !movie.isFavorite
+
+            if (newFavoriteStatus) {
+                addMovieToFavorites(movie)
+            } else {
+                removeMovieFromFavorites(movie)
+            }
+        }
+    }
+
+    fun addMovieToFavorites(movie: Movie) {
+        // Adiciona o filme à lista de favoritos
+        viewModelScope.launch {
+            try {
+                // Implementação para adicionar o filme aos favoritos (como já mostrado)
+                val response = ApiClient.apiService.addMovieToFavorites(
+                    accountId = "10629053",
+                    autorization = autorization,
+                    body = createFavoriteRequestBody(movie, true)
+                )
+
+                if (response.isSuccessful) {
+                    movie.isFavorite = true // Atualiza a propriedade 'isFavorite'
+                } else {
+                    _errorMessage.postValue("Erro ao adicionar filme aos favoritos")
+                }
+            } catch (e: Exception) {
+                _errorMessage.postValue("Erro de conexão: ${e.message}")
+            }
+        }
+    }
+
+    fun removeMovieFromFavorites(movie: Movie) {
+        // Remove o filme dos favoritos
+        viewModelScope.launch {
+            try {
+                val response = ApiClient.apiService.removeMovieFromFavorites(
+                    accountId = "10629053",
+                    autorization = autorization,
+                    body = createFavoriteRequestBody(movie, false)
+                )
+
+                if (response.isSuccessful) {
+                    movie.isFavorite = false // Atualiza a propriedade 'isFavorite'
+                } else {
+                    _errorMessage.postValue("Erro ao remover filme dos favoritos")
+                }
+            } catch (e: Exception) {
+                _errorMessage.postValue("Erro de conexão: ${e.message}")
+            }
+        }
+    }
+
+    private fun createFavoriteRequestBody(movie: Movie, favorite: Boolean): RequestBody {
+        return RequestBody.create(
+            "application/json".toMediaTypeOrNull(),
+            """{
+            "media_type": "movie",
+            "media_id": ${movie.id},
+            "favorite": $favorite
+        }"""
+        )
+    }
 }
+
+//    fun instanceDataBase() {
+//        viewModelScope.launch {
+//            // Use 'withContext' to move the Room database initialization to a background thread
+//            try {
+//                withContext(Dispatchers.Main) {
+//                    context?.let{
+//                        it
+//                    }
+//                    val db = Room.databaseBuilder(
+//                        AppDatabase::class.java, "database-goshtflix"
+//                    ).build()
+//
+//                    // You can now access the database 'db' to perform your queries or other database operations
+//                    Log.d("MovieViewModel", "Database initialized successfully")
+//                }
+//            } catch (e: Exception) {
+//                Log.e("MovieViewModel", "Error initializing database: ${e.message}")
+//            }
+//        }
+//    }
+

@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+//    id("com.google.devtools.ksp")
+
 }
 
 android {
@@ -39,6 +41,16 @@ android {
 }
 
 dependencies {
+    val room_version = "2.6.1"
+
+
+    implementation ("androidx.room:room-runtime:2.6.1")
+//    ksp("androidx.room:room-compiler:$room_version")
+    annotationProcessor("androidx.room:room-compiler:$room_version")
+
+
+    implementation(libs.room.ktx)
+    implementation(libs.androidx.room.paging)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

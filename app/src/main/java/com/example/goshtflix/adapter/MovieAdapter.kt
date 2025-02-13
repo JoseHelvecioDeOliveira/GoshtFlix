@@ -12,7 +12,7 @@ import com.example.goshtflix.model.Movie
 import coil.load
 
 
-class MovieAdapter(private val onClick: (Movie) -> Unit) : ListAdapter<Movie, MovieAdapter.MovieViewHolder>(MovieDiffCallback()) {
+class MovieAdapter(private val onClick: (Movie) -> Unit, private val onFavoriteClick: (Movie) -> Unit) : ListAdapter<Movie, MovieAdapter.MovieViewHolder>(MovieDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
         val binding = ItemMovieBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -21,14 +21,20 @@ class MovieAdapter(private val onClick: (Movie) -> Unit) : ListAdapter<Movie, Mo
 
     override fun onBindViewHolder(holder: MovieViewHolder, position: Int) {
         val movie = getItem(position)
-        holder.bind(movie, onClick)
+        holder.bind(movie, onClick, onFavoriteClick)
     }
 
     class MovieViewHolder(private val binding: ItemMovieBinding) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(movie: Movie, onClick: (Movie) -> Unit) {
-            // Definir o título
+        fun bind(movie: Movie, onClick: (Movie) -> Unit, onFavoriteClick: (Movie) -> Unit) {
+
+            //Definindo o título
             binding.title.text = movie.title
+
+            //Definindo o clique no favoritos
+            binding.favoriteIcon.setOnClickListener{
+                binding.favoriteIcon.setImageResource(R.drawable.ic_favorito_seelcionado)
+            }
 
             // Montar a URL completa para o poster
             val posterUrl = movie.poster_path?.let { "https://image.tmdb.org/t/p/w500$it" }

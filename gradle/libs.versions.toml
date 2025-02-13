@@ -21,6 +21,7 @@ materialVersion = "1.4.0"
 recyclerview = "1.2.1"
 retrofit = "2.9.0"
 roomCompiler = "2.4.3"
+roomCompilerVersion = "2.6.1"
 roomRuntime = "2.6.1"
 roomCommon = "2.6.1"
 roomKtx = "2.6.1"
@@ -33,7 +34,9 @@ androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
+androidx-room-compiler-v261 = { module = "androidx.room:room-compiler", version.ref = "roomCompilerVersion" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomCompiler" }
+androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
 coil = { module = "io.coil-kt:coil", version.ref = "coil" }

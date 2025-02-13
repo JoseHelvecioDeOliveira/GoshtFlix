@@ -14,13 +14,20 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room
+import androidx.room.RoomDatabase
 import androidx.room.util.query
+import com.example.goshtflix.R
 import com.example.goshtflix.adapter.MovieAdapter
+import com.example.goshtflix.dao.AppDatabase
 import com.example.goshtflix.data.network.enums.MovieCategory
 import com.example.goshtflix.databinding.ActivityMainBinding
 import com.example.goshtflix.viewModel.MovieViewModel
+import com.google.android.material.internal.ViewUtils.hideKeyboard
+import com.google.android.material.internal.ViewUtils.showKeyboard
 
 class MainActivity : AppCompatActivity() {
 
@@ -31,6 +38,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -40,30 +48,60 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.fetchPopularMovies(resetList = false)
 
+        binding.toolbarText.visibility = View.VISIBLE
 
         // Configura o botão de Categoria para abrir o BottomSheet
         binding.botaoCategoria.setOnClickListener {
             showFilterBottomSheet()
         }
+
+        binding.listFavoriteIcon.setOnClickListener {
+            binding.listFavoriteIcon.setImageResource(R.drawable.ic_favorito_seelcionado)
+
+            // Aqui, você pode chamar o ViewModel para buscar os filmes favoritos, ou realizar outras ações que queira com o estado de favoritos
+            val accountId = "10629053"
+            val language = "pt-BR"
+            val page = 1
+            val sortBy = "popularity.desc"
+
+            // Exemplo de chamada para o ViewModel para obter filmes favoritos
+            viewModel.getFavoriteMoviesLister(accountId, language, page, sortBy)
+        }
+
+
     }
 
     private fun setupRecyclerView() {
-        movieAdapter = MovieAdapter {
-            val intent = Intent(this, MovieDetailActivity::class.java).apply {
-                putExtra("movieId", it.id)
-                putExtra("movieOverview", it.overview)
-                putExtra("movieTitle", it.title)
-                putExtra("moviePoster", it.poster_path)
-                putExtra("movieReleaseDate", it.release_date)
-                putExtra("movieBudget", it.budget)
-                putExtra("movieGenres", it.genres?.joinToString(", ") ?: "Sem Gênero")
+        movieAdapter = MovieAdapter(
+            onClick = { movie ->
+                val intent = Intent(this, MovieDetailActivity::class.java).apply {
+                    putExtra("movieId", movie.id)
+                    putExtra("movieOverview", movie.overview)
+                    putExtra("movieTitle", movie.title)
+                    putExtra("moviePoster", movie.poster_path)
+                    putExtra("movieReleaseDate", movie.release_date)
+                    putExtra("movieBudget", movie.budget)
+                    putExtra("movieGenres", movie.genres?.joinToString(", ") ?: "Sem Gênero")
+                }
+                startActivity(intent)
+            },
+            onFavoriteClick = { movie ->
+                // Aqui verificamos se o filme já está nos favoritos
+                val isFavorite = movie.isFavorite
+                if (isFavorite) {
+                    // Se o filme já estiver nos favoritos, removemos
+                    viewModel.removeMovieFromFavorites(movie)
+                } else {
+                    // Se não estiver, adicionamos aos favoritos
+                    viewModel.addMovieToFavorites(movie)
+                }
             }
-            startActivity(intent)
-        }
+        )
 
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = movieAdapter
+
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
@@ -83,7 +121,7 @@ class MainActivity : AppCompatActivity() {
                                 MovieCategory.TOP_RATED -> viewModel.loadMoreMovies(category)
                                 MovieCategory.UPCOMING -> viewModel.loadMoreMovies(category)
                                 MovieCategory.POPULAR -> viewModel.loadMoreMovies(category)
-
+                                MovieCategory.FAVORITE -> viewModel.loadMoreMovies(category)
                             }
                         }, 2000)
                     }
@@ -92,11 +130,38 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+
     private fun setupObservers() {
+
+        // Observa os filmes favoritos
+        viewModel.favoriteMovies.observe(this) { movies ->
+            if (movies.isNotEmpty() && movieAdapter.currentList != movies) {
+                movieAdapter.submitList(movies)
+                currentCategory = MovieCategory.FAVORITE
+
+                // Atualiza a lista apenas se os filmes mudaram
+            }
+        }
+
         // Observa os filmes populares
         viewModel.popularMovies.observe(this) { movies ->
             if (movies.isNotEmpty() && movieAdapter.currentList != movies) {
                 movieAdapter.submitList(movies)  // Atualiza a lista apenas se os filmes mudaram
+
+            }
+
+            viewModel.isFavoriteAdded.observe(this) { isFavoriteAdded ->
+                if (isFavoriteAdded) {
+                    Toast.makeText(this, "Filme adicionado aos favoritos!", Toast.LENGTH_SHORT)
+                        .show()
+                } else {
+                    Toast.makeText(
+                        this,
+                        "Erro ao adicionar filme aos favoritos",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
 
@@ -129,6 +194,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+
         // Observa o estado de carregamento
         viewModel.isLoading.observe(this) { isLoading ->
             if (isLoading) {
@@ -140,7 +206,6 @@ class MainActivity : AppCompatActivity() {
         }
         hideProgress()
     }
-
 
     private fun setupSearchView() {
         // Garante que ao clicar no constraintSearch, o EditText receba foco
@@ -189,6 +254,8 @@ class MainActivity : AppCompatActivity() {
     private fun showFilterBottomSheet() {
         val bottomSheetFragment = FilterBottomSheetFragment { filter ->
             val selectedCategory = MovieCategory.fromString(filter)
+            binding.listFavoriteIcon.setImageResource(R.drawable.ic_favorito)
+
 
             // Atualiza a categoria selecionada
             selectedCategory?.let {
@@ -211,16 +278,18 @@ class MainActivity : AppCompatActivity() {
     private fun showProgress() {
         binding.progressBar.visibility = View.VISIBLE
         binding.recyclerView.visibility = View.GONE
-        binding.favoriteIcon.visibility = View.GONE
+        binding.listFavoriteIcon.visibility = View.GONE
         binding.botaoCategoria.visibility = View.GONE
         binding.constraintSearch.visibility = View.GONE
+        binding.toolbarText.visibility = View.GONE
     }
 
     private fun hideProgress() {
         binding.progressBar.visibility = View.GONE
         binding.recyclerView.visibility = View.VISIBLE
         binding.constraintSearch.visibility = View.VISIBLE
-        binding.favoriteIcon.visibility = View.VISIBLE
+        binding.listFavoriteIcon.visibility = View.VISIBLE
         binding.botaoCategoria.visibility = View.VISIBLE
+        binding.toolbarText.visibility = View.VISIBLE
     }
 }

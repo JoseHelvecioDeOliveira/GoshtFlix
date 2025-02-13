@@ -5,6 +5,7 @@ enum class MovieCategory {
     TOP_RATED,
     UPCOMING,
     POPULAR,
+    FAVORITE,
     SEARCH;
 
     companion object {
@@ -15,6 +16,7 @@ enum class MovieCategory {
                 "upcoming" -> UPCOMING
                 "popular" -> POPULAR
                 "search" -> SEARCH
+                "favorite" -> FAVORITE
                 else -> null
             }
         }

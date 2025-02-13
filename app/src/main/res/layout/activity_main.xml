@@ -8,14 +8,40 @@
     android:padding="8dp"
     tools:context=".activity.MainActivity">
 
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        android:background="@color/primaria"
+        app:titleTextColor="@color/white"
+        android:titleTextColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@id/constraintSearch"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/toolbarText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Olá, José !"
+            android:visibility="gone"
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:layout_gravity="left"
+            android:layout_marginTop="10dp"/>
+
+    </com.google.android.material.appbar.MaterialToolbar>
+
+
     <!-- Barra de pesquisa -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintSearch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintEnd_toEndOf="parent"
         android:padding="12dp"
         app:layout_constraintBottom_toTopOf="@id/botaoCategoria">
@@ -98,7 +124,7 @@
     </androidx.appcompat.widget.AppCompatImageButton>
 
     <ImageView
-        android:id="@+id/favoriteIcon"
+        android:id="@+id/listFavoriteIcon"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:padding="6dp"
