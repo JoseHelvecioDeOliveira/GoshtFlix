@@ -13,21 +13,14 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.room.util.query
 import com.example.goshtflix.R
 import com.example.goshtflix.adapter.MovieAdapter
-import com.example.goshtflix.dao.AppDatabase
 import com.example.goshtflix.data.network.enums.MovieCategory
 import com.example.goshtflix.databinding.ActivityMainBinding
 import com.example.goshtflix.viewModel.MovieViewModel
-import com.google.android.material.internal.ViewUtils.hideKeyboard
-import com.google.android.material.internal.ViewUtils.showKeyboard
+
 
 class MainActivity : AppCompatActivity() {
 

@@ -1,25 +1,16 @@
 package com.example.goshtflix.viewModel
 
-import android.app.Application
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.room.Room
-import androidx.room.util.query
 import com.example.goshtflix.activity.GoshtFlixApplication
-import com.example.goshtflix.dao.AppDatabase
 import com.example.goshtflix.data.network.ApiClient
-import com.example.goshtflix.data.network.TmdbApi
 import com.example.goshtflix.data.network.enums.MovieCategory
 import com.example.goshtflix.model.Movie
 import com.example.goshtflix.repository.UserDataRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import okhttp3.Dispatcher
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 
@@ -368,25 +359,4 @@ class MovieViewModel : ViewModel() {
         )
     }
 }
-
-//    fun instanceDataBase() {
-//        viewModelScope.launch {
-//            // Use 'withContext' to move the Room database initialization to a background thread
-//            try {
-//                withContext(Dispatchers.Main) {
-//                    context?.let{
-//                        it
-//                    }
-//                    val db = Room.databaseBuilder(
-//                        AppDatabase::class.java, "database-goshtflix"
-//                    ).build()
-//
-//                    // You can now access the database 'db' to perform your queries or other database operations
-//                    Log.d("MovieViewModel", "Database initialized successfully")
-//                }
-//            } catch (e: Exception) {
-//                Log.e("MovieViewModel", "Error initializing database: ${e.message}")
-//            }
-//        }
-//    }
 
