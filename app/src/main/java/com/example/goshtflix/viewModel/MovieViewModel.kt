@@ -296,25 +296,19 @@ class MovieViewModel : ViewModel() {
                 val response = ApiClient.apiService.getFavoriteMovies(accountId, language, page, autorization, sortBy)
 
                 if (response.isSuccessful) {
-                    _favoriteMovies.value = response.body()?.results ?: emptyList()
+                    val favoriteMovies = response.body()?.results?.map { movie ->
+                        movie.isFavorite = true  // Marca o filme como favorito
+                        movie
+                    } ?: emptyList()
+
+                    _favoriteMovies.value = favoriteMovies
+
                 } else {
 
                     Log.e("MovieViewModel", "Erro ao buscar filmes favoritos: ${response.message()}")
                 }
             } catch (e: Exception) {
                 Log.e("MovieViewModel", "Erro ao buscar filmes favoritos: ${e.message}")
-            }
-        }
-    }
-    fun toggleFavoriteStatus(movie: Movie) {
-        viewModelScope.launch {
-            // Alterna o status de favorito
-            val newFavoriteStatus = !movie.isFavorite
-
-            if (newFavoriteStatus) {
-                addMovieToFavorites(movie)
-            } else {
-                removeMovieFromFavorites(movie)
             }
         }
     }
@@ -342,26 +336,10 @@ class MovieViewModel : ViewModel() {
     }
 
     fun removeMovieFromFavorites(movie: Movie) {
-        // Remove o filme dos favoritos
-        viewModelScope.launch {
-            try {
-                val response = ApiClient.apiService.removeMovieFromFavorites(
-                    accountId = "10629053",
-                    autorization = autorization,
-                    body = createFavoriteRequestBody(movie, false)
-                )
-
-                if (response.isSuccessful) {
-                    movie.isFavorite = false // Atualiza a propriedade 'isFavorite'
-                } else {
-                    _errorMessage.postValue("Erro ao remover filme dos favoritos")
-                }
-            } catch (e: Exception) {
-                _errorMessage.postValue("Erro de conexão: ${e.message}")
-            }
-        }
+        // Remove o filme da lista de favoritos
+        val currentFavorites = _favoriteMovies.value ?: emptyList()
+        _favoriteMovies.value = currentFavorites.filter { it.id != movie.id }
     }
-
     private fun createFavoriteRequestBody(movie: Movie, favorite: Boolean): RequestBody {
         return RequestBody.create(
             "application/json".toMediaTypeOrNull(),

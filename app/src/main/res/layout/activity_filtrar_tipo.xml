@@ -76,6 +76,14 @@
                 android:checked="false"
                 android:text="Melhor Avaliado" />
 
+            <androidx.appcompat.widget.AppCompatRadioButton
+                android:id="@+id/radioPopular"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:checked="false"
+                android:text="Populares" />
+
         </RadioGroup>
 
     </androidx.appcompat.widget.LinearLayoutCompat>

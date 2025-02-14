@@ -25,6 +25,7 @@ class FilterBottomSheetFragment(private val onFilterSelected: (String) -> Unit) 
                 R.id.radioPassandoAgora -> onFilterSelected("now_playing")
                 R.id.radioMelhorAvaliado -> onFilterSelected("top_rated")
                 R.id.radioPorVir -> onFilterSelected("upcoming")
+                R.id.radioPopular -> onFilterSelected("popular")
             }
             dismiss()  // Fecha o BottomSheet após a seleção
         }

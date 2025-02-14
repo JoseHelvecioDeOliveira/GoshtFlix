@@ -31,9 +31,28 @@ class MovieAdapter(private val onClick: (Movie) -> Unit, private val onFavoriteC
             //Definindo o título
             binding.title.text = movie.title
 
-            //Definindo o clique no favoritos
-            binding.favoriteIcon.setOnClickListener{
-                binding.favoriteIcon.setImageResource(R.drawable.ic_favorito_seelcionado)
+            // Definindo o ícone de favoritos com base no estado atual do filme
+            val favoriteIconRes = if (movie.isFavorite) {
+                R.drawable.ic_favorito_seelcionado
+            } else {
+                R.drawable.ic_favorito
+            }
+            binding.favoriteIcon.setImageResource(favoriteIconRes)
+
+            // Definindo o clique no ícone de favoritos
+            binding.favoriteIcon.setOnClickListener {
+                // Alterna o estado de favorito
+                movie.isFavorite = !movie.isFavorite
+                // Atualiza o ícone
+                val newFavoriteIconRes = if (movie.isFavorite) {
+                    R.drawable.ic_favorito_seelcionado
+                } else {
+                    R.drawable.ic_favorito
+                }
+                movie.isFavorite = !movie.isFavorite
+                binding.favoriteIcon.setImageResource(newFavoriteIconRes)
+                // Notifica o clique no favorito
+                onFavoriteClick(movie)
             }
 
             // Montar a URL completa para o poster

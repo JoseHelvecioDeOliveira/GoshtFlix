@@ -42,6 +42,12 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val userName = intent.getStringExtra("USER_NAME")
+
+        userName?.let {
+            binding.toolbarText.text = "Bem-vindo(a), $it!" // Exibe o nome na toolbarText
+        }
+
         setupRecyclerView()
         setupObservers()
         setupSearchView()
@@ -58,14 +64,14 @@ class MainActivity : AppCompatActivity() {
         binding.listFavoriteIcon.setOnClickListener {
             binding.listFavoriteIcon.setImageResource(R.drawable.ic_favorito_seelcionado)
 
-            // Aqui, você pode chamar o ViewModel para buscar os filmes favoritos, ou realizar outras ações que queira com o estado de favoritos
+            // Chama o ViewModel para buscar os filmes favoritos, ou realizar outras ações que queira com o estado de favoritos
             val accountId = "10629053"
             val language = "pt-BR"
             val page = 1
             val sortBy = "popularity.desc"
 
-            // Exemplo de chamada para o ViewModel para obter filmes favoritos
             viewModel.getFavoriteMoviesLister(accountId, language, page, sortBy)
+
         }
 
 
@@ -86,17 +92,19 @@ class MainActivity : AppCompatActivity() {
                 startActivity(intent)
             },
             onFavoriteClick = { movie ->
-                // Aqui verificamos se o filme já está nos favoritos
-                val isFavorite = movie.isFavorite
-                if (isFavorite) {
-                    // Se o filme já estiver nos favoritos, removemos
+
+                if (movie.isFavorite) {
                     viewModel.removeMovieFromFavorites(movie)
+                    movie.isFavorite = false
+
                 } else {
-                    // Se não estiver, adicionamos aos favoritos
                     viewModel.addMovieToFavorites(movie)
+                    movie.isFavorite = true
                 }
+
             }
         )
+
 
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
@@ -136,7 +144,7 @@ class MainActivity : AppCompatActivity() {
 
         // Observa os filmes favoritos
         viewModel.favoriteMovies.observe(this) { movies ->
-            if (movies.isNotEmpty() && movieAdapter.currentList != movies) {
+            if (movies.isNotEmpty()) {
                 movieAdapter.submitList(movies)
                 currentCategory = MovieCategory.FAVORITE
 
@@ -268,6 +276,7 @@ class MainActivity : AppCompatActivity() {
                 MovieCategory.NOW_PLAYING -> viewModel.fetchNowPlayingMovies(resetList = true)
                 MovieCategory.TOP_RATED -> viewModel.fetchTopRatedMovies(resetList = true)
                 MovieCategory.UPCOMING -> viewModel.fetchUpcomingMovies(resetList = true)
+                MovieCategory.POPULAR -> viewModel.fetchPopularMovies(resetList = true)
                 else -> {}
             }
         }
