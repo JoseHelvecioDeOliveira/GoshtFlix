@@ -336,10 +336,27 @@ class MovieViewModel : ViewModel() {
     }
 
     fun removeMovieFromFavorites(movie: Movie) {
-        // Remove o filme da lista de favoritos
-        val currentFavorites = _favoriteMovies.value ?: emptyList()
-        _favoriteMovies.value = currentFavorites.filter { it.id != movie.id }
+        viewModelScope.launch {
+            try {
+                val response = ApiClient.apiService.addMovieToFavorites(
+                    accountId = "10629053",
+                    autorization = autorization,
+                    body = createFavoriteRequestBody(movie, false) // false para remover
+                )
+
+                if (response.isSuccessful) {
+                    val currentFavorites = _favoriteMovies.value ?: emptyList()
+                    _favoriteMovies.postValue(currentFavorites.filter { it.id != movie.id })
+                } else {
+                    _errorMessage.postValue("Erro ao remover filme dos favoritos")
+                }
+            } catch (e: Exception) {
+                _errorMessage.postValue("Erro de conexão: ${e.message}")
+            }
+        }
     }
+
+
     private fun createFavoriteRequestBody(movie: Movie, favorite: Boolean): RequestBody {
         return RequestBody.create(
             "application/json".toMediaTypeOrNull(),

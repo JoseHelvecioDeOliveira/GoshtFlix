@@ -41,12 +41,13 @@ class MovieAdapter(private val onClick: (Movie) -> Unit, private val onFavoriteC
 
             // Definindo o clique no ícone de favoritos
             binding.favoriteIcon.setOnClickListener {
-                // Alterna o estado de favorito
                 movie.isFavorite = !movie.isFavorite
-                // Atualiza o ícone
+
                 val newFavoriteIconRes = if (movie.isFavorite) {
                     R.drawable.ic_favorito_seelcionado
-                } else {
+                }
+                else
+                {
                     R.drawable.ic_favorito
                 }
                 movie.isFavorite = !movie.isFavorite

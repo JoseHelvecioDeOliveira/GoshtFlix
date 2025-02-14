@@ -142,21 +142,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupObservers() {
 
-        // Observa os filmes favoritos
-        viewModel.favoriteMovies.observe(this) { movies ->
-            if (movies.isNotEmpty()) {
-                movieAdapter.submitList(movies)
-                currentCategory = MovieCategory.FAVORITE
-
-                // Atualiza a lista apenas se os filmes mudaram
-            }
-        }
-
         // Observa os filmes populares
         viewModel.popularMovies.observe(this) { movies ->
             if (movies.isNotEmpty() && movieAdapter.currentList != movies) {
                 movieAdapter.submitList(movies)  // Atualiza a lista apenas se os filmes mudaram
 
+            }
+        }
+
+            // Observa os filmes favoritos
+            viewModel.favoriteMovies.observe(this) { movies ->
+                if (movies.isNotEmpty()) {
+                    movieAdapter.submitList(movies)
+                    currentCategory = MovieCategory.FAVORITE
+
+                    // Atualiza a lista apenas se os filmes mudaram
+                }
             }
 
             viewModel.isFavoriteAdded.observe(this) { isFavoriteAdded ->
@@ -171,7 +172,6 @@ class MainActivity : AppCompatActivity() {
                     ).show()
                 }
             }
-        }
 
         viewModel.nowPlayingMovies.observe(this) { movies ->
             if (movies.isNotEmpty() && movieAdapter.currentList != movies) {
