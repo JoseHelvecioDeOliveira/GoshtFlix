@@ -1,4 +1,4 @@
-GoshtFlix
+## GoshtFlix
 📌 Contexto
 O objetivo deste desafio é desenvolver um aplicativo Android simples, porém funcional, para exibir informações sobre filmes utilizando a API gratuita The Movie DB.
 
