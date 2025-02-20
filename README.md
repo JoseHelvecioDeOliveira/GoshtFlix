@@ -10,7 +10,7 @@ O aplicativo permite ao usuário que visualize uma lista de filmes, procure e fi
 
 Como a API já permitia adicionar filmes a listagem de favoritos, buscar esses filmes e remover, não foi necessária a implementação de DataBase.
 
-🔧 ### Stack (Tecnologias utilizadas no APP)
+### Stack (Tecnologias utilizadas no APP)
 
 O aplicativo foi desenvolvido utilizando as seguintes tecnologias:
 
@@ -30,7 +30,7 @@ O aplicativo foi desenvolvido utilizando as seguintes tecnologias:
 
 **Paging 3** → Para facilitar a paginação.
 
-🎯 ### Requisitos do Aplicativo
+### Requisitos do Aplicativo
 
 O aplicativo contém as seguintes funcionalidades:
 
@@ -52,7 +52,8 @@ O aplicativo contém as seguintes funcionalidades:
 
 **Implementar filtros para refinar os resultados exibidos.**
 
-🎫 ### Bônus
+### Bônus
+
 **Implementações adicionais:**
 
 **Exibição de Estados de Carregamento (Loading)** → Mostrar um indicador de carregamento durante a busca de dados.
