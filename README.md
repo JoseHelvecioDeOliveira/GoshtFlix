@@ -2,7 +2,7 @@
 
 ### Contexto
 
-O objetivo deste desafio é desenvolver um aplicativo Android simples, porém funcional, para exibir informações sobre filmes utilizando a API gratuita The Movie DB.
+**O objetivo deste desafio é desenvolver um aplicativo Android simples, porém funcional, para exibir informações sobre filmes utilizando a API gratuita The Movie DB.**
 
 O App foi desenvolvido seguindo as Stacks atuais do mercado e também as utilizadas dentro da empresa que forneceu o desafio.
 
